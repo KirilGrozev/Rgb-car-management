@@ -1,29 +1,71 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-from rgb_car_management.web.models import CarExamination, CarReady, Car, Customer
+from rgb_car_management.web.models import Car, Customer, AcceptedCar, IssuedCar, Employee
 
 
-class CreateCarExaminationForm(forms.ModelForm):
+class RegisterUserForm(UserCreationForm):
+    user = None
+
+    class Meta(UserCreationForm.Meta):
+        model = Employee
+        fields = ('first_name', 'last_name', 'email')
+
+        label = {
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'email': 'Email',
+        }
+
+    widgets = {
+        'first_name': forms.TextInput(attrs={'placeholder': 'Enter First Name'}),
+        'last_name': forms.TextInput(attrs={'placeholder': 'Enter Last Name'}),
+        'email': forms.EmailInput(attrs={'placeholder': 'Enter Email'}),
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.help_text = None
+
+
+class LoginUserForm(AuthenticationForm):
     class Meta:
-        model = CarExamination
+        model = Employee
+        fields = '__all__'
+
+        label = {
+            'username': 'Email',
+            'password': 'Password'
+        }
+
+    widgets = {
+        'username': forms.EmailInput(attrs={'placeholder': 'Enter Email'}),
+        'password': forms.TextInput(attrs={'placeholder': 'Enter Password'})
+    }
+
+
+class CreateAcceptedCarForm(forms.ModelForm):
+    class Meta:
+        model = AcceptedCar
         exclude = ('date',)
 
 
-class EditCarExaminationForm(forms.ModelForm):
+class EditAcceptedCarForm(forms.ModelForm):
     class Meta:
-        model = CarExamination
+        model = AcceptedCar
         fields = '__all__'
 
 
-class CreateReadyCarForm(forms.ModelForm):
+class CreateIssuedCarForm(forms.ModelForm):
     class Meta:
-        model = CarReady
+        model = IssuedCar
         exclude = ('date',)
 
 
-class EditReadyCarForm(forms.ModelForm):
+class EditIssuedCarForm(forms.ModelForm):
     class Meta:
-        model = CarExamination
+        model = IssuedCar
         fields = '__all__'
 
 

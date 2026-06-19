@@ -1,19 +1,23 @@
 from django.urls import path
 
-from rgb_car_management.web.views import CarExaminations, ReadyCars, Customers, CreateCarExamination, \
-    EditCarExamination, DeleteCarExamination, CreateReadyCar, EditReadyCar, DeleteReadyCar, CreateCar, EditCar, \
-    DeleteCar, CreateCustomer, EditCustomer, DeleteCustomer
+from rgb_car_management.web.views import CreateCar, EditCar, \
+    DeleteCar, CreateCustomer, EditCustomer, DeleteCustomer, AcceptedCars, IssuedCars, Customers, CreateAcceptedCar, \
+    EditAcceptedCar, DeleteAcceptedCar, CreateIssuedCar, EditIssuedCar, DeleteIssuedCar, Cars, Register, Login, Logout
 
 urlpatterns = [
-    path('car-examinations/', CarExaminations.as_view(), name='car examinations'),
-    path('ready-car/', ReadyCars.as_view(), name='ready cars'),
+    path('register/', Register.as_view(), name='register'),
+    path('login/', Login.as_view(), name='login'),
+    path('logout/', Logout.as_view(), name='logout'),
+    path('accepted-cars/', AcceptedCars.as_view(), name='accepted cars'),
+    path('issued-cars/', IssuedCars.as_view(), name='issued cars'),
+    path('cars/', Cars.as_view(), name='cars'),
     path('customers/', Customers.as_view(), name='customers'),
-    path('create/car-examination/', CreateCarExamination.as_view(), name='create car examination'),
-    path('edit/car-examination/<int:pk>/', EditCarExamination.as_view(), name='edit car examination'),
-    path('delete/car-examination/<int:pk>/', DeleteCarExamination.as_view(), name='delete car examination'),
-    path('create/ready-car/', CreateReadyCar.as_view(), name='create ready car'),
-    path('edit/ready-car/<int:pk>/', EditReadyCar.as_view(), name='edit ready car'),
-    path('delete/ready-car/<int:pk>/', DeleteReadyCar.as_view(), name='delete ready car'),
+    path('create/accepted-car/', CreateAcceptedCar.as_view(), name='create accepted car'),
+    path('edit/accepted-car/<int:pk>/', EditAcceptedCar.as_view(), name='edit accepted car'),
+    path('delete/accepted-car/<int:pk>/', DeleteAcceptedCar.as_view(), name='delete accepted car'),
+    path('create/issued-car/', CreateIssuedCar.as_view(), name='create issued car'),
+    path('edit/issued-car/<int:pk>/', EditIssuedCar.as_view(), name='edit issued car'),
+    path('delete/issued-car/<int:pk>/', DeleteIssuedCar.as_view(), name='delete issued car'),
     path('create/car/', CreateCar.as_view(), name='create car'),
     path('edit/car/<int:pk>/', EditCar.as_view(), name='edit car'),
     path('delete/car/<int:pk>/', DeleteCar.as_view(), name='delete car'),
