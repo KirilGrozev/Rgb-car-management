@@ -2,9 +2,11 @@ from django.urls import path
 
 from rgb_car_management.web.views import CreateCar, EditCar, \
     DeleteCar, CreateCustomer, EditCustomer, DeleteCustomer, AcceptedCars, IssuedCars, Customers, CreateAcceptedCar, \
-    EditAcceptedCar, DeleteAcceptedCar, CreateIssuedCar, EditIssuedCar, DeleteIssuedCar, Cars, Register, Login, Logout
+    EditAcceptedCar, DeleteAcceptedCar, CreateIssuedCar, EditIssuedCar, DeleteIssuedCar, Cars, Register, Login, Logout, \
+    HomeRedirect
 
 urlpatterns = [
+    path('', HomeRedirect.as_view(), name='home redirect'),
     path('register/', Register.as_view(), name='register'),
     path('login/', Login.as_view(), name='login'),
     path('logout/', Logout.as_view(), name='logout'),

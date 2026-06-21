@@ -8,10 +8,47 @@
 {% block content %}
     <script src="{% static 'js/toogle_other_field.js' %}"></script>
 
-    <form method="post" action="{% url 'create accepted car' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="container mt-4">
+    <h2>{% if object %}Редактирай приета кола{% else %}Създай приета кола{% endif %}</h2>
 
-        <button type="submit">Създай</button>
+    <form method="post" action="{% if object %}{% url 'edit_accepted_car' object.pk %}{% else %}{% url 'create_accepted_car' %}{% endif %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.car.label_tag }}
+            {{ form.car }}
+            {% if form.car.errors %}
+                <div class="text-danger">{{ form.car.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.customer.label_tag }}
+            {{ form.customer }}
+            {% if form.customer.errors %}
+                <div class="text-danger">{{ form.customer.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.selected_issues.label_tag }}
+            {{ form.selected_issues }}
+            {% if form.selected_issues.errors %}
+                <div class="text-danger">{{ form.selected_issues.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group" id="other-container" style="display:none;">
+            {{ form.other_issue_description.label_tag }}
+            {{ form.other_issue_description }}
+            {% if form.other_issue_description.errors %}
+                <div class="text-danger">{{ form.other_issue_description.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            {% if object %}Редактирай{% else %}Създай{% endif %}
+        </button>
     </form>
+    </div>
 {% endblock %}

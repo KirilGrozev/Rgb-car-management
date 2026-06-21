@@ -10,6 +10,20 @@
     <title>{% block title %}RGB Car Management{% endblock %}</title>
 </head>
 <body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'accepted cars' %}">Приети коли</a></li>
+            <li><a href="{% url 'cars' %}">Коли</a></li>
+            <li><a href="{% url 'issued cars' %}">Издадени коли</a></li>
+            <li><a href="{% url 'customers' %}">Клиенти</a></li>
+            <li><a href="{% url 'create accepted car' %}">Създай приета кола</a></li>
+            <li><a href="{% url 'create car' %}">Създай кола</a></li>
+            <li><a href="{% url 'create issued car' %}">Създай издадена кола</a></li>
+            <li><a href="{% url 'create customer' %}">Създай клиент</a></li>
+            <li><a href="{% url 'logout' %}">Изход</a></li>
+        </ul>
+    </nav>
+
     {% block content %}
     {% endblock %}
 </body>

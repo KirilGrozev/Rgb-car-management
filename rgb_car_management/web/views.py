@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -7,9 +7,17 @@ from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView
 
 from rgb_car_management.web.forms import CreateCarForm, EditCarForm, CreateCustomerForm, EditCustomerForm, \
-    CreateAcceptedCarForm, \
-    EditAcceptedCarForm, CreateIssuedCarForm, EditIssuedCarForm, LoginUserForm, RegisterUserForm
+    CreateIssuedCarForm, EditIssuedCarForm, LoginUserForm, RegisterUserForm, AcceptedCarForm
+from rgb_car_management.web.mixins import SearchMixin, StaffOnlyMixin
 from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee
+
+
+class HomeRedirect(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('accepted cars')
+        else:
+            return redirect('login')
 
 
 class Register(CreateView):
@@ -40,44 +48,65 @@ class Login(LoginView):
 class Logout(LoginRequiredMixin, LogoutView):
     def get(self, request):
         logout(request)
-        return redirect('register')
+        return redirect('login')
 
 
-class AcceptedCars(LoginRequiredMixin, ListView):
+class AcceptedCars(LoginRequiredMixin, SearchMixin, ListView):
     model = AcceptedCar
     template_name = 'accеpted_cars.html'
+    context_object_name = 'accepted_cars'
+    paginate_by = 10
+
+    search_fields = [
+        'car__registration_number'
+    ]
 
 
-class IssuedCars(LoginRequiredMixin, ListView):
+class IssuedCars(LoginRequiredMixin, SearchMixin, ListView):
     model = IssuedCar
     template_name = 'issued_cars.html'
+    context_object_name = 'issued_cars'
+    paginate_by = 10
+
+    search_fields = [
+        'accepted_car__car__registration_number'
+    ]
 
 
-class Cars(LoginRequiredMixin, ListView):
+class Cars(LoginRequiredMixin, SearchMixin, ListView):
     model = Car
     template_name = 'cars.html'
+    context_object_name = 'cars'
+    paginate_by = 10
+
+    search_fields = [
+        'registration_number'
+    ]
+
 
 
 class Customers(LoginRequiredMixin, ListView):
     model = Customer
     template_name = 'customers.html'
+    context_object_name = 'customers'
+    paginate_by = 10
 
 
 class CreateAcceptedCar(LoginRequiredMixin, CreateView):
     model = AcceptedCar
-    template_name = 'create_accepted_car.html'
+    template_name = 'accepted_car_actions.html'
     success_url = reverse_lazy('accepted cars')
-    form_class = CreateAcceptedCarForm
+    form_class = AcceptedCarForm
 
 
-class EditAcceptedCar(LoginRequiredMixin, UpdateView):
+class EditAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = AcceptedCar
-    template_name = 'edit_accepted_car.html'
+    template_name = 'accepted_car_actions.html'
     success_url = reverse_lazy('accepted cars')
-    form_class = EditAcceptedCarForm
+    form_class = AcceptedCarForm
 
 
-class DeleteAcceptedCar(LoginRequiredMixin, View):
+class DeleteAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         accepted_car = get_object_or_404(AcceptedCar, pk=pk)
         accepted_car.delete()
@@ -92,14 +121,14 @@ class CreateIssuedCar(LoginRequiredMixin, CreateView):
     form_class = CreateIssuedCarForm
 
 
-class EditIssuedCar(LoginRequiredMixin, UpdateView):
+class EditIssuedCar(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = IssuedCar
     template_name = 'edit_issued_car.html'
     success_url = reverse_lazy('issued cars')
     form_class = EditIssuedCarForm
 
 
-class DeleteIssuedCar(LoginRequiredMixin, View):
+class DeleteIssuedCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         issued_car = get_object_or_404(IssuedCar, pk=pk)
         issued_car.delete()
@@ -114,14 +143,14 @@ class CreateCar(LoginRequiredMixin, CreateView):
     form_class = CreateCarForm
 
 
-class EditCar(LoginRequiredMixin, CreateView):
+class EditCar(LoginRequiredMixin, StaffOnlyMixin, CreateView):
     model = Car
     template_name = 'edit_car.html'
     success_url = reverse_lazy('car_examination')
     form_class = EditCarForm
 
 
-class DeleteCar(LoginRequiredMixin, View):
+class DeleteCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         car = get_object_or_404(Car, pk=pk)
         car.delete()
@@ -136,14 +165,14 @@ class CreateCustomer(LoginRequiredMixin, CreateView):
     form_class = CreateCustomerForm
 
 
-class EditCustomer(LoginRequiredMixin, UpdateView):
+class EditCustomer(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = Customer
     template_name = 'edit_customer.html'
     success_url = reverse_lazy('car_examination')
     form_class = EditCustomerForm
 
 
-class DeleteCustomer(LoginRequiredMixin, View):
+class DeleteCustomer(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         customer = get_object_or_404(Customer, pk=pk)
         customer.delete()

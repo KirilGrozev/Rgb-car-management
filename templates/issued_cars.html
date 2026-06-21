@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
 {% load static %}
 {% block additional_css %}
     <link rel="stylesheet" href="{% static 'css/issued_cars.css' %}">
@@ -5,4 +6,5 @@
 {% block title %}Издадени коли{% endblock %}
 
 {% block content %}
+    {% include 'components/search_bar.html' %}
 {% endblock %}
