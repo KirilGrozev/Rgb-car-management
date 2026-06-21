@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'css/form_base.css' %}">
+{% endblock %}
+{% block title %}Създване на приета кола{% endblock %}
+
+{% block content %}
+    <script src="{% static 'js/toogle_other_field.js' %}"></script>
+
+    <form method="post" action="{% url 'create accepted car' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Създай</button>
+    </form>
+{% endblock %}
