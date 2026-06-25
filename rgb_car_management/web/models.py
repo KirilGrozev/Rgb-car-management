@@ -149,14 +149,14 @@ class CarIssue(models.Model):
     category = models.ForeignKey(
         CarIssueCategory,
         on_delete=models.CASCADE,
-        related_name='issues',
+        related_name='issues_category',
     )
     problem = models.ForeignKey(
         CarProblem,
         on_delete=models.PROTECT,
         blank=True,
         null=True,
-        related_name='issues',
+        related_name='issues_problems',
     )
     other_issue = models.TextField(
         max_length=MAX_OTHER_ISSUE_LENGTH,
@@ -191,7 +191,7 @@ class AcceptedCar(models.Model):
     accepting_employee = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
-        related_name='accepted_cars',
+        related_name='accepted_cars_ae',
     )
     date = models.DateTimeField(
         auto_now_add=True,
@@ -202,7 +202,7 @@ class AcceptedCar(models.Model):
     )
     issues = models.ManyToManyField(
         CarIssue,
-        related_name='accepted_cars',
+        related_name='accepted_cars_i',
     )
 
     def __str__(self):
@@ -218,11 +218,10 @@ class IssuedCar(models.Model):
     mechanic = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
-        related_name='accepted_cars',
+        related_name='accepted_cars_m',
     )
     repairs = models.ManyToManyField(
         CarIssue,
-        on_delete=models.CASCADE,
         related_name='issued_cars',
     )
     date = models.DateTimeField(

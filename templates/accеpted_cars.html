@@ -8,4 +8,13 @@
 {% block content %}
     {% include 'components/search_bar.html' with search_query=search_query %}
     <a href="{% url 'create accepted car' %}">Създай приета кола</a>
+
+    {% for ac in accepted_cars %}
+        {{ ac.accepting_employee.first_name }} {{ ac.accepting_employee.last_name }}
+        {{ ac.car.registration_number }}
+        {{ ac.customer.first_name }} {{ ac.customer.last_name }}
+        {% for i in ac.issues.objects.all %}
+            {{ i.category }} - {{ i }}
+        {% endfor %}
+    {% endfor %}
 {% endblock %}

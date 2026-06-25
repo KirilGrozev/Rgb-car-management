@@ -8,4 +8,16 @@
 {% block content %}
     {% include 'components/search_bar.html' with search_query=search_query %}
     <a href="{% url 'create car' %}">Създай кола</a>
+
+    {% for c in cars %}
+        {{ c.registration_number }}
+        {{ c.brand }} -> {{ c.model }}
+        {% if request.user.is_superuser %}
+            <a href="{% url 'edit car' c.pk %}">Редактирай</a>
+            <form method="post" action="{% url 'delete car' c.pk %}">
+                {% csrf_token %}
+                <button type="submit">Изтрий</button>
+            </form>
+        {% endif %}
+    {% endfor %}
 {% endblock %}

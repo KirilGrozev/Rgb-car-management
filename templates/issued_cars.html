@@ -8,4 +8,13 @@
 {% block content %}
     {% include 'components/search_bar.html' with search_query=search_query %}
     <a href="{% url 'create issued car' %}">Създай издадена кола</a>
+
+    {% for ic in issued_cars %}
+        {{ ic.mechanic.first_name }} {{ ic.mechanic.last_name }}
+        {{ ic.accepted_car.car.registration_number }}
+        {{ ic.accepted_car.customer.first_name }} {{ ic.accepted_car.customer.last_name }}
+        {% for r in ic.repairs.objects.all %}
+            {{ r.category }} - {{ r }}
+        {% endfor %}
+    {% endfor %}
 {% endblock %}

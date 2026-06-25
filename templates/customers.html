@@ -7,4 +7,15 @@
 
 {% block content %}
     <a href="{% url 'create customer' %}">Създай клиент</a>
+
+    {% for c in customers %}
+        {{ c.first_name }} {{ c.last_name }} -> {{ c.phone_number }}
+        {% if request.user.is_superuser %}
+            <a href="{% url 'edit customer' c.pk %}">Редактирай</a>
+            <form method="post" action="{% url 'delete customer' c.pk %}">
+                {% csrf_token %}
+                <button type="submit">Изтрий</button>
+            </form>
+        {% endif %}
+    {% endfor %}
 {% endblock %}

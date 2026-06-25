@@ -27,6 +27,7 @@ class SearchMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('search', '')
+        context['clear_url'] = self.request.path
         return context
 
 

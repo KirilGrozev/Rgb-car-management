@@ -8,13 +8,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
-from scipy._lib.cobyqa.problem import Problem
 from weasyprint import HTML, CSS
 
 from rgb_car_management.web.forms import CreateCarForm, EditCarForm, CreateCustomerForm, EditCustomerForm, \
     LoginUserForm, RegisterUserForm
 from rgb_car_management.web.mixins import SearchMixin, StaffOnlyMixin, AcceptedCarFormMixin, IssuedCarFormMixin
-from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee
+from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee, CarProblem
 
 
 class HomeRedirect(View):
@@ -98,7 +97,7 @@ class Customers(LoginRequiredMixin, ListView):
 
 class ProblemsJsonView(View):
     def get(self, request):
-        items = Problem.objects.filter(category_id=request.GET.get('category')).values('id', 'name')
+        items = CarProblem.objects.filter(category_id=request.GET.get('category')).values('id', 'name')
         return JsonResponse({'problems': list(items)})
 
 
@@ -116,7 +115,7 @@ class CreateAcceptedCar(LoginRequiredMixin, AcceptedCarFormMixin, CreateView):
 
 
 class AcceptedCarDetails(LoginRequiredMixin, DetailView):
-    model = AcceptedCar
+    queryset = AcceptedCar.objects.select_related('car', 'customer', 'accepting_employee').prefetch_related('issues')
     template_name = 'accepted_car_details.html'
 
 
@@ -136,7 +135,7 @@ class CreateIssuedCar(LoginRequiredMixin, IssuedCarFormMixin, CreateView):
 
 
 class IssuedCarDetails(LoginRequiredMixin, DetailView):
-    model = IssuedCar
+    queryset = IssuedCar.objects.select_related('accepted_car', 'mechanic').prefetch_related('repairs')
     template_name = 'issued_car_details.html'
 
 
@@ -155,14 +154,14 @@ class DeleteIssuedCar(LoginRequiredMixin, StaffOnlyMixin, View):
 class CreateCar(LoginRequiredMixin, CreateView):
     model = Car
     template_name = 'create_car.html'
-    success_url = reverse_lazy('car_examination')
+    success_url = reverse_lazy('accepted cars')
     form_class = CreateCarForm
 
 
-class EditCar(LoginRequiredMixin, StaffOnlyMixin, CreateView):
+class EditCar(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = Car
     template_name = 'edit_car.html'
-    success_url = reverse_lazy('car_examination')
+    success_url = reverse_lazy('accepted cars')
     form_class = EditCarForm
 
 
@@ -171,20 +170,20 @@ class DeleteCar(LoginRequiredMixin, StaffOnlyMixin, View):
         car = get_object_or_404(Car, pk=pk)
         car.delete()
 
-        return redirect('car_examinations')
+        return redirect('accepted cars')
 
 
 class CreateCustomer(LoginRequiredMixin, CreateView):
     model = Customer
     template_name = 'create_customer.html'
-    success_url = reverse_lazy('car_examination')
+    success_url = reverse_lazy('accepted cars')
     form_class = CreateCustomerForm
 
 
 class EditCustomer(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = Customer
     template_name = 'edit_customer.html'
-    success_url = reverse_lazy('car_examination')
+    success_url = reverse_lazy('accepted cars')
     form_class = EditCustomerForm
 
 
@@ -193,7 +192,7 @@ class DeleteCustomer(LoginRequiredMixin, StaffOnlyMixin, View):
         customer = get_object_or_404(Customer, pk=pk)
         customer.delete()
 
-        return redirect('car_examinations')
+        return redirect('accepted cars')
 
 
 class AcceptedCarPdf(View):

@@ -8,7 +8,7 @@
 {% block content %}
     <h1>{% if object %}Редактирай приета кола{% else %}Създай приета кола{% endif %}</h1>
 
-    <form method="post" action="{% if object %}{% url 'edit_accepted_car' object.pk %}{% else %}{% url 'create_accepted_car' %}{% endif %}">
+    <form method="post" action="{% if object %}{% url 'edit accepted car' object.pk %}{% else %}{% url 'create accepted car' %}{% endif %}">
         {% csrf_token %}
 
         {{ form.non_field_errors }}
@@ -16,8 +16,8 @@
         <div class="grid2">
             <div class="field">
                 <label for="{{ form.customer.id_for_label }}">Клиент</label>
-                {{ form.client }}
-                {{ form.client.errors }}
+                {{ form.customer }}
+                {{ form.customer.errors }}
             </div>
             <div class="field">
                 <label for="{{ form.car.id_for_label }}">Кола</label>

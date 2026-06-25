@@ -2,9 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.db.models import Q
 from django.forms import Select
-from django_select2 import forms as select2_forms
 from django_select2.forms import ModelSelect2Widget
-from libmambapy.bindings.solver import ProblemsGraph
 
 from rgb_car_management.web.models import Car, Customer, AcceptedCar, IssuedCar, Employee, CarIssue, CarProblem
 
@@ -86,7 +84,7 @@ class AcceptedCarForm(forms.ModelForm):
         widgets = {
             'car': CarWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси кола...'}),
             'customer': CustomerWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси клиент...'}),
-            'accepting_employee': Select(attrs={'class': 'form-control'}),
+            'accepting_employee': Select(attrs={'class': 'form-control', 'placeholder': 'Потърси приемащ служител...'}),
         }
 
         labels = {
@@ -99,7 +97,7 @@ class AcceptedCarForm(forms.ModelForm):
 class AcceptedCarWidget(ModelSelect2Widget):
     model = AcceptedCar
     search_fields = ['car__registration_number__icontains', 'customer__first_name__icontains']
-    queryset = AcceptedCar.objects.filter(issue__isnull=True)
+    queryset = AcceptedCar.objects.filter(issues__isnull=True)
 
 
 

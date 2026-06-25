@@ -1,11 +1,11 @@
 {{ issues.management_form }}
 {{ issues.non_form_errors }}
 
-<div class="complaints">
+<div class="complaints"
     data-url="{% url 'problems json' %}"
     data-prefix="{{ formset.prefix }}"
     {% if load_from_accepted %}data-issues-url="{% url 'accepted issues json' %}"{% endif %}
-    data-other-categories="{{ other_category_ids }}"
+    data-other-categories="{{ other_category_ids }}">
 
     {% for f in issues %}
         <div class="complaint-row">
@@ -36,4 +36,4 @@
     </div>
 </template>
 
-<button type="submit" id="add-row" class="btn">{{ add_label|default: "Добави" }}</button>
+<button type="submit" id="add-row" class="btn">{{ add_label|default:"Добави" }}</button>

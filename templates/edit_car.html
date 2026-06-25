@@ -6,7 +6,7 @@
 {% block title %}Редактиране на кола{% endblock %}
 
 {% block content %}
-    <form method="post" action="{% url 'edit car' pk=object.pk %}">
+    <form method="post" action="{% url 'edit car' object.pk %}">
         {% csrf_token %}
         {{ form.as_p }}
 
