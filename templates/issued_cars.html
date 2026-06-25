@@ -6,5 +6,6 @@
 {% block title %}Издадени коли{% endblock %}
 
 {% block content %}
-    {% include 'components/search_bar.html' %}
+    {% include 'components/search_bar.html' with search_query=search_query %}
+    <a href="{% url 'create issued car' %}">Създай издадена кола</a>
 {% endblock %}

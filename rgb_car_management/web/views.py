@@ -1,14 +1,19 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.staticfiles import finders
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
+from scipy._lib.cobyqa.problem import Problem
+from weasyprint import HTML, CSS
 
 from rgb_car_management.web.forms import CreateCarForm, EditCarForm, CreateCustomerForm, EditCustomerForm, \
-    CreateIssuedCarForm, EditIssuedCarForm, LoginUserForm, RegisterUserForm, AcceptedCarForm
-from rgb_car_management.web.mixins import SearchMixin, StaffOnlyMixin
+    LoginUserForm, RegisterUserForm
+from rgb_car_management.web.mixins import SearchMixin, StaffOnlyMixin, AcceptedCarFormMixin, IssuedCarFormMixin
 from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee
 
 
@@ -55,7 +60,7 @@ class AcceptedCars(LoginRequiredMixin, SearchMixin, ListView):
     model = AcceptedCar
     template_name = 'accеpted_cars.html'
     context_object_name = 'accepted_cars'
-    paginate_by = 10
+    paginate_by = 25
 
     search_fields = [
         'car__registration_number'
@@ -66,7 +71,7 @@ class IssuedCars(LoginRequiredMixin, SearchMixin, ListView):
     model = IssuedCar
     template_name = 'issued_cars.html'
     context_object_name = 'issued_cars'
-    paginate_by = 10
+    paginate_by = 25
 
     search_fields = [
         'accepted_car__car__registration_number'
@@ -77,34 +82,46 @@ class Cars(LoginRequiredMixin, SearchMixin, ListView):
     model = Car
     template_name = 'cars.html'
     context_object_name = 'cars'
-    paginate_by = 10
+    paginate_by = 25
 
     search_fields = [
         'registration_number'
     ]
 
 
-
 class Customers(LoginRequiredMixin, ListView):
     model = Customer
     template_name = 'customers.html'
     context_object_name = 'customers'
-    paginate_by = 10
+    paginate_by = 25
 
 
-class CreateAcceptedCar(LoginRequiredMixin, CreateView):
+class ProblemsJsonView(View):
+    def get(self, request):
+        items = Problem.objects.filter(category_id=request.GET.get('category')).values('id', 'name')
+        return JsonResponse({'problems': list(items)})
+
+
+class AcceptedIssuesJsonView(View):
+    def get(self, request):
+        car = get_object_or_404(AcceptedCar, pk=request.GET.get('accepted'))
+        data = [
+            {'category': i.category.id, 'problems': i.problem_id, 'other_issue': i.other_issue, 'is_other': i.category.is_other}
+            for i in car.issues.select_related('category', 'problem')]
+        return JsonResponse({'issues': data})
+
+
+class CreateAcceptedCar(LoginRequiredMixin, AcceptedCarFormMixin, CreateView):
+    pass
+
+
+class AcceptedCarDetails(LoginRequiredMixin, DetailView):
     model = AcceptedCar
-    template_name = 'accepted_car_actions.html'
-    success_url = reverse_lazy('accepted cars')
-    form_class = AcceptedCarForm
+    template_name = 'accepted_car_details.html'
 
 
-class EditAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
-    model = AcceptedCar
-    template_name = 'accepted_car_actions.html'
-    success_url = reverse_lazy('accepted cars')
-    form_class = AcceptedCarForm
-
+class EditAcceptedCar(LoginRequiredMixin, AcceptedCarFormMixin, StaffOnlyMixin, UpdateView):
+    pass
 
 class DeleteAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
@@ -114,18 +131,17 @@ class DeleteAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, View):
         return redirect('accepted cars')
 
 
-class CreateIssuedCar(LoginRequiredMixin, CreateView):
-    model = IssuedCar
-    template_name = 'create_issued_car.html'
-    success_url = reverse_lazy('issued cars')
-    form_class = CreateIssuedCarForm
+class CreateIssuedCar(LoginRequiredMixin, IssuedCarFormMixin, CreateView):
+    pass
 
 
-class EditIssuedCar(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
+class IssuedCarDetails(LoginRequiredMixin, DetailView):
     model = IssuedCar
-    template_name = 'edit_issued_car.html'
-    success_url = reverse_lazy('issued cars')
-    form_class = EditIssuedCarForm
+    template_name = 'issued_car_details.html'
+
+
+class EditIssuedCar(LoginRequiredMixin, StaffOnlyMixin, IssuedCarFormMixin, UpdateView):
+    pass
 
 
 class DeleteIssuedCar(LoginRequiredMixin, StaffOnlyMixin, View):
@@ -178,3 +194,45 @@ class DeleteCustomer(LoginRequiredMixin, StaffOnlyMixin, View):
         customer.delete()
 
         return redirect('car_examinations')
+
+
+class AcceptedCarPdf(View):
+    def get(self, request, pk):
+        obj = get_object_or_404(AcceptedCar, pk=pk)
+
+        html_string = render_to_string(
+            "documents/accepted_car_pdf.html",
+            {'object': obj},
+            request=request,
+        )
+        css_path = finders.find('css/document_css.css')
+
+        pdf_bytes = HTML(
+            string=html_string,
+            base_url=request.build_absolute_uri('/'),
+        ).write_pdf(stylesheets=[CSS(filename=css_path)])
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="priem-{obj.pk:04d}.pdf"'
+        return response
+
+
+class IssuedCarPdf(View):
+    def get(self, request, pk):
+        obj = get_object_or_404(IssuedCar, pk=pk)
+
+        html_string = render_to_string(
+            "documents/issued_car_pdf.html",
+            {'object': obj},
+            request=request,
+        )
+        css_path = finders.find('css/document_css.css')
+
+        pdf_bytes = HTML(
+            string=html_string,
+            base_url=request.build_absolute_uri('/'),
+        ).write_pdf(stylesheets=[CSS(filename=css_path)])
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="izdavane-{obj.pk:04d}.pdf"'
+        return response

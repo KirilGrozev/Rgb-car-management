@@ -1,0 +1,39 @@
+{{ issues.management_form }}
+{{ issues.non_form_errors }}
+
+<div class="complaints">
+    data-url="{% url 'problems json' %}"
+    data-prefix="{{ formset.prefix }}"
+    {% if load_from_accepted %}data-issues-url="{% url 'accepted issues json' %}"{% endif %}
+    data-other-categories="{{ other_category_ids }}"
+
+    {% for f in issues %}
+        <div class="complaint-row">
+            {{ f.id }}
+            <div class="cat">
+                {{ f.category }}
+                {{ f.category.errors }}
+            </div>
+            <div class="mid">
+                <span class="problems-wrap">{{ f.problem }}</span>
+                <span class="custom-wrap hide">{{ f.other_issue }}</span>
+                {{ f.problem.errors }}
+                {{ f.other_issue.errors }}
+            </div>
+            <label class="del-box">{{ f.DELETE }} Махни</label>
+        </div>
+    {% endfor %}
+</div>
+
+<template id="empty-form">
+    <div class="complaint-row">
+        <div class="cat">{{ issues.empty_form.category }}</div>
+        <div class="mid">
+            <span class="problem-wrap">{{ issues.empty_form.problem }}</span>
+            <span class="custom-wrap hide">{{ issues.empty_form.other_issue }}</span>
+        </div>
+        <label class="del-box">{{ issues.empty_form.DELETE }} Махни</label>
+    </div>
+</template>
+
+<button type="submit" id="add-row" class="btn">{{ add_label|default: "Добави" }}</button>

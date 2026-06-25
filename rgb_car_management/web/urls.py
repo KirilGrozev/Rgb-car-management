@@ -3,7 +3,7 @@ from django.urls import path
 from rgb_car_management.web.views import CreateCar, EditCar, \
     DeleteCar, CreateCustomer, EditCustomer, DeleteCustomer, AcceptedCars, IssuedCars, Customers, CreateAcceptedCar, \
     EditAcceptedCar, DeleteAcceptedCar, CreateIssuedCar, EditIssuedCar, DeleteIssuedCar, Cars, Register, Login, Logout, \
-    HomeRedirect
+    HomeRedirect, AcceptedCarPdf, IssuedCarPdf, ProblemsJsonView, AcceptedIssuesJsonView
 
 urlpatterns = [
     path('', HomeRedirect.as_view(), name='home redirect'),
@@ -26,4 +26,8 @@ urlpatterns = [
     path('create/customer/', CreateCustomer.as_view(), name='create customer'),
     path('edit/customer/<int:pk>/', EditCustomer.as_view(), name='edit customer'),
     path('delete/customer/<int:pk>/', DeleteCustomer.as_view(), name='delete customer'),
+    path('priem/<int:pk>/pdf/', AcceptedCarPdf.as_view(), name='accepted car pdf'),
+    path('izdavane/<int:pk>/pdf/', IssuedCarPdf.as_view(), name='issued car pdf'),
+    path('api/problems/', ProblemsJsonView.as_view(), name='problems json'),
+    path('api/accepted-issues/', AcceptedIssuesJsonView.as_view(), name='accepted issues json'),
 ]

@@ -6,5 +6,6 @@
 {% block title %}Всички коли{% endblock %}
 
 {% block content %}
-    {% include 'components/search_bar.html' %}
+    {% include 'components/search_bar.html' with search_query=search_query %}
+    <a href="{% url 'create car' %}">Създай кола</a>
 {% endblock %}

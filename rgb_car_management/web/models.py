@@ -1,7 +1,9 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import User, PermissionsMixin, UserManager
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
+from scipy._lib.cobyqa.problem import Problem
 
 from rgb_car_management.web.managers import RgbCarManagementUserManager
 from rgb_car_management.web.validators import contains_only_letters_validator
@@ -108,40 +110,88 @@ class Car(models.Model):
         return f'{self.registration_number}'
 
 
-class CarIssue(models.Model):
-    ISSUE_CHOICES = (
-        ('broken engine', 'broken engine'),
-        ('other', 'other'),
+class CarIssueCategory(models.Model):
+    MAX_CATEGORY_CHOICES_LENGTH = 100
+
+    category = models.CharField(
+        max_length=MAX_CATEGORY_CHOICES_LENGTH,
+    )
+    is_other = models.BooleanField(
+        default=False,
     )
 
-    MAX_ISSUE_CHOICES_LENGTH = max([len(i) for i, _ in ISSUE_CHOICES])
+    def __str__(self):
+        return self.category
 
+
+class CarProblem(models.Model):
+    MAX_NAME_LENGTH = 100
+
+    category = models.ForeignKey(
+        CarIssueCategory,
+        on_delete=models.CASCADE,
+        related_name='problems',
+    )
+    name = models.CharField(
+        max_length=MAX_NAME_LENGTH
+    )
+
+    class Meta:
+        unique_together = ('category', 'name')
+
+    def __str__(self):
+        return self.name
+
+
+class CarIssue(models.Model):
     MAX_OTHER_ISSUE_LENGTH = 100
 
-    issue = models.CharField(
-        max_length=MAX_ISSUE_CHOICES_LENGTH,
-        choices=ISSUE_CHOICES,
+    category = models.ForeignKey(
+        CarIssueCategory,
+        on_delete=models.CASCADE,
+        related_name='issues',
+    )
+    problem = models.ForeignKey(
+        CarProblem,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name='issues',
     )
     other_issue = models.TextField(
         max_length=MAX_OTHER_ISSUE_LENGTH,
         blank=True,
         null=True,
     )
-    is_ready = models.BooleanField(
-        default=False,
-    )
+
+    def clean(self):
+        if not self.category_id:
+            return
+        if self.category.is_other:
+            if not self.other_issue:
+                raise ValidationError({'other_issue': 'Опиши проблема!'})
+            else:
+                self.problem = None
+        else:
+            if not self.problem:
+                raise ValidationError({'problem': 'Избери проблем!'})
+            if self.problem.category_id != self.category_id:
+                raise ValidationError({'problem': 'Този проблем не е от тази категория!'})
+            self.other_issue = None
 
     def __str__(self):
-        if self.other_issue:
-            return self.other_issue
-        else:
-            return self.issue
+        return self.other_issue or (self.problem.name if self.problem else self.category.category)
 
 
 class AcceptedCar(models.Model):
     customer = models.OneToOneField(
         Customer,
         on_delete=models.CASCADE,
+    )
+    accepting_employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='accepted_cars',
     )
     date = models.DateTimeField(
         auto_now_add=True,
@@ -154,13 +204,9 @@ class AcceptedCar(models.Model):
         CarIssue,
         related_name='accepted_cars',
     )
-    is_ready = models.BooleanField(
-        default=False,
-    )
 
     def __str__(self):
         return f'{str(self.customer)} - {str(self.car)}'
-
 
 
 
@@ -169,7 +215,16 @@ class IssuedCar(models.Model):
         AcceptedCar,
         on_delete=models.CASCADE,
     )
-    fixes = models.CharField()
+    mechanic = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='accepted_cars',
+    )
+    repairs = models.ManyToManyField(
+        CarIssue,
+        on_delete=models.CASCADE,
+        related_name='issued_cars',
+    )
     date = models.DateTimeField(
         auto_now_add=True,
     )

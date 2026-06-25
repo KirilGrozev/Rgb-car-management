@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block additional_css %}
+    <link rel="stylesheet" href="{% static 'css/form_base.css' %}">
+{% endblock %}
+{% block title %}Създаване на издадена кола{% endblock %}
+
+{% block content %}
+    <h1>{% if object %}Редактирай издаден кола{% else %}Създай издадена кола{% endif %}</h1>
+
+    <form method="post" action="{% if object %}{% url 'edit issued car' object.pk %}{% else %}{% url 'create issued car' %}{% endif %}">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="grid2">
+            <div class="field">
+                <label for="{{ form.accepted_car.id_for_label }}">Приета кола</label>
+                {{ form.accepted_car }}
+                {{ form.accepted_car.errors }}
+            </div>
+            <div class="field">
+                <label for="{{ form.mechanic.id_for_label }}">Автомонтьор</label>
+                {{ form.mechanic }}
+                {{ form.mechanic.errors }}
+            </div>
+        </div>
+
+        <div class="sec">Извършени поправки</div>
+        {% include 'service/_issue_rows.html' with add_label="Добави поправка" load_from_accepted=True %}
+
+        <div class="foot">
+            <span class="hint">Редовете идват от приема - можеш да мехаш и добавяш</span>
+            <button type="submit" class="btn primary">Запази</button>
+        </div>
+    </form>
+
+    <script src="{% static 'js/issues_visualization.js' %}"></script>
+{% endblock %}

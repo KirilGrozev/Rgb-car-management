@@ -1,8 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.db.models import Q
+from django.forms import Select
 from django_select2 import forms as select2_forms
+from django_select2.forms import ModelSelect2Widget
+from libmambapy.bindings.solver import ProblemsGraph
 
-from rgb_car_management.web.models import Car, Customer, AcceptedCar, IssuedCar, Employee, CarIssue
+from rgb_car_management.web.models import Car, Customer, AcceptedCar, IssuedCar, Employee, CarIssue, CarProblem
 
 
 class RegisterUserForm(UserCreationForm):
@@ -46,120 +50,80 @@ class LoginUserForm(AuthenticationForm):
     }
 
 
+class CarIssueForm(forms.ModelForm):
+    class Meta:
+        model = CarIssue
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['problem'].required = False
+        self.fields['other_issue'].required = False
+        self.fields['problem'].queryset = CarProblem.objects.none()
+
+        category_id = self.data.get(self.add_prefix('category')) or \
+                      (self.instance.category_id if self.instance.pk else None)
+        if category_id:
+            self.fields['problem'].queryset = CarProblem.objects.filter(category_id=category_id)
+
+
+class CustomerWidget(ModelSelect2Widget):
+    model = Customer
+    search_fields = ['first_name__icontains', 'last_name__icontains', 'phone_number__icontains']
+
+
+class CarWidget(ModelSelect2Widget):
+    model = Car
+    search_fields = ['registration_number__icontains', 'brand__icontains', 'model__icontains']
+    dependent_fields = {'customer': 'customer'}
+
+
 class AcceptedCarForm(forms.ModelForm):
-    selected_issues = forms.MultipleChoiceField(
-        choices=CarIssue.ISSUE_CHOICES,
-        widget=forms.CheckboxSelectMultiple(attrs={
-            'class': 'issue-checkbox',
-            'onchange': 'toggleOtherFields()'
-        }),
-        required=True,
-        label='Избери проблемите по колата'
-    )
-
-    other_issue_description = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'id': 'other-description',
-            'rows': 3,
-            'placeholder': 'Въведи друг проблем по колата',
-            'style': 'display:none;'
-        }),
-        required=False,
-        label='Друг проблем по колата'
-    )
-
     class Meta:
         model = AcceptedCar
         exclude = ('date',)
 
         widgets = {
-            'car': select2_forms.Select2Widget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси кола...'}),
-            'customer': select2_forms.Select2Widget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси клиент...'}),
+            'car': CarWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси кола...'}),
+            'customer': CustomerWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси клиент...'}),
+            'accepting_employee': Select(attrs={'class': 'form-control'}),
         }
 
         labels = {
             'car': 'Кола',
             'customer': 'Клиент',
+            'accepting_employee': 'Приемащ служител'
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        selected_issues = cleaned_data.get('selected_issues')
-        other_issue_description = cleaned_data.get('other_issue_description')
 
-        if selected_issues and 'other' in selected_issues:
-            if not other_issue_description or not other_issue_description.strip():
-                raise forms.ValidationError(
-                    'Моля поясни проблема след като си избрал "Друго"! '
-                )
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-
-        if commit:
-            instance.save()
-
-        instance.issues.clear()
-
-        selected_issues = self.cleaned_data.get('selected_issues', [])
-        other_issue = self.cleaned_data.get('other_issue_description', '')
-
-        for issue_type in selected_issues:
-            if issue_type == 'other':
-                car_issue = CarIssue.objects.create(
-                    issue='other',
-                    other_issue=other_issue
-                )
-            else:
-                car_issue = CarIssue.objects.create(
-                    issue=issue_type
-                )
-
-            instance.issues.add(car_issue)
-
-        return instance
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance and self.instance.pk:
-            existing_issues = self.instance.issues.all()
-
-            selected_issue_types = list(existing_issues.values_list('problem_type', flat=True))
-
-            self.fields['selected_issues'].initial = selected_issue_types
-
-            other_issue = existing_issues.filter(problem_type='other').first()
-
-            if other_issue and other_issue.other_description:
-                self.fields['other_issue_description'].initial = other_issue.other_description
+class AcceptedCarWidget(ModelSelect2Widget):
+    model = AcceptedCar
+    search_fields = ['car__registration_number__icontains', 'customer__first_name__icontains']
+    queryset = AcceptedCar.objects.filter(issue__isnull=True)
 
 
-class CreateIssuedCarForm(forms.ModelForm):
+
+class IssuedCarForm(forms.ModelForm):
     class Meta:
         model = IssuedCar
         exclude = ('date',)
 
         widgets = {
-            'accepted_car': select2_forms.Select2Widget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси приета кола...'}),
+            'accepted_car': AcceptedCarWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси приета кола...'}),
+            'mechanic': Select(attrs={'class': 'form-control'}),
         }
 
         labels = {
             'accepted_car': 'Приета кола',
+            'mechanic': 'Автомонтьор'
         }
 
-
-class EditIssuedCarForm(forms.ModelForm):
-    class Meta:
-        model = IssuedCar
-        fields = '__all__'
-
-        labels = {
-            'accepted_car': 'Приета кола'
-        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['accepted_car'].queryset = AcceptedCar.objects.filter(
+                Q(issue__isnull=True) | Q(pk=self.instance.accepted_car_id)
+            )
 
 
 class CreateCarForm(forms.ModelForm):
