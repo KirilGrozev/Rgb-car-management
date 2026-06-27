@@ -73,18 +73,18 @@ class CustomerWidget(ModelSelect2Widget):
 class CarWidget(ModelSelect2Widget):
     model = Car
     search_fields = ['registration_number__icontains', 'brand__icontains', 'model__icontains']
-    dependent_fields = {'customer': 'customer'}
+    #dependent_fields = {'customer': 'customer'}
 
 
 class AcceptedCarForm(forms.ModelForm):
     class Meta:
         model = AcceptedCar
-        exclude = ('date',)
+        exclude = ('date', 'issues')
 
         widgets = {
             'car': CarWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси кола...'}),
             'customer': CustomerWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси клиент...'}),
-            'accepting_employee': Select(attrs={'class': 'form-control', 'placeholder': 'Потърси приемащ служител...'}),
+            'accepting_employee': Select(attrs={'class': 'form-control', 'data-placeholder': 'Потърси приемащ служител...'}),
         }
 
         labels = {
@@ -97,14 +97,14 @@ class AcceptedCarForm(forms.ModelForm):
 class AcceptedCarWidget(ModelSelect2Widget):
     model = AcceptedCar
     search_fields = ['car__registration_number__icontains', 'customer__first_name__icontains']
-    queryset = AcceptedCar.objects.filter(issues__isnull=True)
+    queryset = AcceptedCar.objects.filter(issuedcar__isnull=True)
 
 
 
 class IssuedCarForm(forms.ModelForm):
     class Meta:
         model = IssuedCar
-        exclude = ('date',)
+        exclude = ('date', 'repairs')
 
         widgets = {
             'accepted_car': AcceptedCarWidget(attrs={'class': 'form-control', 'data-placeholder': 'Потърси приета кола...'}),
@@ -119,8 +119,9 @@ class IssuedCarForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
+            self.fields['accepted_car'].disabled = True
             self.fields['accepted_car'].queryset = AcceptedCar.objects.filter(
-                Q(issue__isnull=True) | Q(pk=self.instance.accepted_car_id)
+                Q(issuedcar__isnull=True) | Q(pk=self.instance.accepted_car_id)
             )
 
 

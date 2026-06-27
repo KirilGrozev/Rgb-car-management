@@ -1,39 +1,37 @@
-{{ issues.management_form }}
-{{ issues.non_form_errors }}
+{{ formset.management_form }}
 
-<div class="complaints"
+<div id="complaints"
     data-url="{% url 'problems json' %}"
     data-prefix="{{ formset.prefix }}"
     {% if load_from_accepted %}data-issues-url="{% url 'accepted issues json' %}"{% endif %}
     data-other-categories="{{ other_category_ids }}">
 
-    {% for f in issues %}
+    {% for f in formset %}
         <div class="complaint-row">
             {{ f.id }}
             <div class="cat">
                 {{ f.category }}
-                {{ f.category.errors }}
             </div>
             <div class="mid">
-                <span class="problems-wrap">{{ f.problem }}</span>
+                <span class="problem-wrap hide">{{ f.problem }}</span>
                 <span class="custom-wrap hide">{{ f.other_issue }}</span>
-                {{ f.problem.errors }}
-                {{ f.other_issue.errors }}
             </div>
-            <label class="del-box">{{ f.DELETE }} Махни</label>
+            <label class="del-box">{{ f.DELETE }}</label>
+            <button type="button" class="remove-row btn" aria-label="Махни реда">Махни</button>
         </div>
     {% endfor %}
 </div>
 
 <template id="empty-form">
     <div class="complaint-row">
-        <div class="cat">{{ issues.empty_form.category }}</div>
+        <div class="cat">{{ formset.empty_form.category }}</div>
         <div class="mid">
-            <span class="problem-wrap">{{ issues.empty_form.problem }}</span>
-            <span class="custom-wrap hide">{{ issues.empty_form.other_issue }}</span>
+            <span class="problem-wrap hide">{{ formset.empty_form.problem }}</span>
+            <span class="custom-wrap hide">{{ formset.empty_form.other_issue }}</span>
         </div>
-        <label class="del-box">{{ issues.empty_form.DELETE }} Махни</label>
+        <label class="del-box">{{ formset.empty_form.DELETE }}</label>
+        <button type="button" class="remove-row btn" aria-label="Махни реда">Махни</button>
     </div>
 </template>
 
-<button type="submit" id="add-row" class="btn">{{ add_label|default:"Добави" }}</button>
+<button type="button" id="add-row" class="btn">{{ add_label|default:"Добави" }}</button>

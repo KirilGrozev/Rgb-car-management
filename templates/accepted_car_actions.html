@@ -3,6 +3,10 @@
 {% block additional_css %}
     <link rel="stylesheet" href="{% static 'css/form_base.css' %}">
 {% endblock %}
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    {{ form.media }}
+{% endblock %}
 {% block title %}Създване на приета кола{% endblock %}
 
 {% block content %}
@@ -11,23 +15,18 @@
     <form method="post" action="{% if object %}{% url 'edit accepted car' object.pk %}{% else %}{% url 'create accepted car' %}{% endif %}">
         {% csrf_token %}
 
-        {{ form.non_field_errors }}
-
         <div class="grid2">
             <div class="field">
                 <label for="{{ form.customer.id_for_label }}">Клиент</label>
                 {{ form.customer }}
-                {{ form.customer.errors }}
             </div>
             <div class="field">
                 <label for="{{ form.car.id_for_label }}">Кола</label>
                 {{ form.car }}
-                {{ form.car.errors }}
             </div>
             <div class="field">
                 <label for="{{ form.accepting_employee.id_for_label }}">Приемащ служител</label>
                 {{ form.accepting_employee }}
-                {{ form.accepting_employee.errors }}
             </div>
         </div>
 

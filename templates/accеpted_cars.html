@@ -16,5 +16,6 @@
         {% for i in ac.issues.objects.all %}
             {{ i.category }} - {{ i }}
         {% endfor %}
+        <a href="{% url 'accepted car details' ac.pk %}">Детайли</a>
     {% endfor %}
 {% endblock %}

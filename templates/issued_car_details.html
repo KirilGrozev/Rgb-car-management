@@ -6,4 +6,14 @@
 {% block title %}Детайли за издадената кола{% endblock %}
 
 {% block content %}
+    {% if request.user.is_superuser %}
+        <a href="{% url 'edit issued car' object.pk %}">Редактирай</a>
+        <form method="post" action="{% url 'delete issued car' object.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn danger"
+                    onclick="return confirm('Сигурен ли си, че искаш да изтриеш това издаване?')">
+                Изтрий
+            </button>
+        </form>
+    {% endif %}
 {% endblock %}

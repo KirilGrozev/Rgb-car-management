@@ -3,7 +3,6 @@ from django.contrib.auth.models import User, PermissionsMixin, UserManager
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
-from scipy._lib.cobyqa.problem import Problem
 
 from rgb_car_management.web.managers import RgbCarManagementUserManager
 from rgb_car_management.web.validators import contains_only_letters_validator
@@ -42,7 +41,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     objects = RgbCarManagementUserManager()
 
     def __str__(self):
-        return self.email
+        return f'{self.first_name} {self.last_name}'
 
 
 class Customer(models.Model):
@@ -89,6 +88,7 @@ class Car(models.Model):
         validators=(
             MinLengthValidator(MIN_REGISTRATION_NUMBER_LENGTH),
         ),
+        unique=True,
     )
     brand = models.CharField(
         max_length=MAX_BRAND_LENGTH,
@@ -104,6 +104,7 @@ class Car(models.Model):
         validators=(
             MinLengthValidator(VIN_NUMBER_LENGTH),
         ),
+        unique=True,
     )
 
     def __str__(self):
@@ -184,9 +185,10 @@ class CarIssue(models.Model):
 
 
 class AcceptedCar(models.Model):
-    customer = models.OneToOneField(
+    customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,
+        related_name='accepted_car_customer',
     )
     accepting_employee = models.ForeignKey(
         Employee,
@@ -196,17 +198,18 @@ class AcceptedCar(models.Model):
     date = models.DateTimeField(
         auto_now_add=True,
     )
-    car = models.OneToOneField(
+    car = models.ForeignKey(
         Car,
         on_delete=models.CASCADE,
+        related_name='accepted_car_car',
     )
     issues = models.ManyToManyField(
         CarIssue,
-        related_name='accepted_cars_i',
+        related_name='accepted_cars',
     )
 
     def __str__(self):
-        return f'{str(self.customer)} - {str(self.car)}'
+        return f'{str(self.customer)} - {str(self.car)} - {self.date}'
 
 
 

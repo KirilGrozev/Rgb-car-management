@@ -16,5 +16,6 @@
         {% for r in ic.repairs.objects.all %}
             {{ r.category }} - {{ r }}
         {% endfor %}
+        <a href="{% url 'issued car details' ic.pk %}">Детайли</a>
     {% endfor %}
 {% endblock %}

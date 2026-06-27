@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.contrib.auth.views import LoginView, LogoutView
@@ -13,7 +14,7 @@ from weasyprint import HTML, CSS
 from rgb_car_management.web.forms import CreateCarForm, EditCarForm, CreateCustomerForm, EditCustomerForm, \
     LoginUserForm, RegisterUserForm
 from rgb_car_management.web.mixins import SearchMixin, StaffOnlyMixin, AcceptedCarFormMixin, IssuedCarFormMixin
-from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee, CarProblem
+from rgb_car_management.web.models import Customer, Car, IssuedCar, AcceptedCar, Employee, CarProblem, CarIssue
 
 
 class HomeRedirect(View):
@@ -105,7 +106,7 @@ class AcceptedIssuesJsonView(View):
     def get(self, request):
         car = get_object_or_404(AcceptedCar, pk=request.GET.get('accepted'))
         data = [
-            {'category': i.category.id, 'problems': i.problem_id, 'other_issue': i.other_issue, 'is_other': i.category.is_other}
+            {'category': i.category.id, 'problem': i.problem_id, 'other_issue': i.other_issue, 'is_other': i.category.is_other}
             for i in car.issues.select_related('category', 'problem')]
         return JsonResponse({'issues': data})
 
@@ -125,6 +126,11 @@ class EditAcceptedCar(LoginRequiredMixin, AcceptedCarFormMixin, StaffOnlyMixin, 
 class DeleteAcceptedCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         accepted_car = get_object_or_404(AcceptedCar, pk=pk)
+        if hasattr(accepted_car, 'issuedcar'):
+            messages.error(request, 'Не можеш да изтриеш вече издадена кола!')
+            return redirect('accepted cars')
+
+        accepted_car.issues.all().delete()
         accepted_car.delete()
 
         return redirect('accepted cars')
@@ -146,6 +152,7 @@ class EditIssuedCar(LoginRequiredMixin, StaffOnlyMixin, IssuedCarFormMixin, Upda
 class DeleteIssuedCar(LoginRequiredMixin, StaffOnlyMixin, View):
     def post(self, request, pk):
         issued_car = get_object_or_404(IssuedCar, pk=pk)
+        issued_car.repairs.all().delete()
         issued_car.delete()
 
         return redirect('issued cars')

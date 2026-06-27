@@ -3,7 +3,8 @@ from django.urls import path
 from rgb_car_management.web.views import CreateCar, EditCar, \
     DeleteCar, CreateCustomer, EditCustomer, DeleteCustomer, AcceptedCars, IssuedCars, Customers, CreateAcceptedCar, \
     EditAcceptedCar, DeleteAcceptedCar, CreateIssuedCar, EditIssuedCar, DeleteIssuedCar, Cars, Register, Login, Logout, \
-    HomeRedirect, AcceptedCarPdf, IssuedCarPdf, ProblemsJsonView, AcceptedIssuesJsonView
+    HomeRedirect, AcceptedCarPdf, IssuedCarPdf, ProblemsJsonView, AcceptedIssuesJsonView, AcceptedCarDetails, \
+    IssuedCarDetails
 
 urlpatterns = [
     path('', HomeRedirect.as_view(), name='home redirect'),
@@ -15,9 +16,11 @@ urlpatterns = [
     path('cars/', Cars.as_view(), name='cars'),
     path('customers/', Customers.as_view(), name='customers'),
     path('create/accepted-car/', CreateAcceptedCar.as_view(), name='create accepted car'),
+    path('accepted-car-details/<int:pk>/', AcceptedCarDetails.as_view(), name='accepted car details'),
     path('edit/accepted-car/<int:pk>/', EditAcceptedCar.as_view(), name='edit accepted car'),
     path('delete/accepted-car/<int:pk>/', DeleteAcceptedCar.as_view(), name='delete accepted car'),
     path('create/issued-car/', CreateIssuedCar.as_view(), name='create issued car'),
+    path('issued-car-details/<int:pk>/', IssuedCarDetails.as_view(), name='issued car details'),
     path('edit/issued-car/<int:pk>/', EditIssuedCar.as_view(), name='edit issued car'),
     path('delete/issued-car/<int:pk>/', DeleteIssuedCar.as_view(), name='delete issued car'),
     path('create/car/', CreateCar.as_view(), name='create car'),

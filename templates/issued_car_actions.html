@@ -3,6 +3,10 @@
 {% block additional_css %}
     <link rel="stylesheet" href="{% static 'css/form_base.css' %}">
 {% endblock %}
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    {{ form.media }}
+{% endblock %}
 {% block title %}Създаване на издадена кола{% endblock %}
 
 {% block content %}
@@ -11,23 +15,30 @@
     <form method="post" action="{% if object %}{% url 'edit issued car' object.pk %}{% else %}{% url 'create issued car' %}{% endif %}">
         {% csrf_token %}
 
-        {{ form.non_field_errors }}
-
-        <div class="grid2">
+        {% if object %}
+            <div class="readonly-block">
+                <div class="line"><span>Приета кола</span><span>{{ object.accepted_car }}</span></div>
+            </div>
+        {% else %}
             <div class="field">
                 <label for="{{ form.accepted_car.id_for_label }}">Приета кола</label>
                 {{ form.accepted_car }}
-                {{ form.accepted_car.errors }}
             </div>
+        {% endif %}
+
+        <div class="grid2">
             <div class="field">
                 <label for="{{ form.mechanic.id_for_label }}">Автомонтьор</label>
                 {{ form.mechanic }}
-                {{ form.mechanic.errors }}
             </div>
         </div>
 
         <div class="sec">Извършени поправки</div>
-        {% include 'service/_issue_rows.html' with add_label="Добави поправка" load_from_accepted=True %}
+        {% if object %}
+            {% include 'service/_issue_rows.html' with add_label="Добави поправка" %}
+        {% else %}
+            {% include 'service/_issue_rows.html' with add_label="Добави поправка" load_from_accepted=True %}
+        {% endif %}
 
         <div class="foot">
             <span class="hint">Редовете идват от приема - можеш да мехаш и добавяш</span>

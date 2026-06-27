@@ -16,7 +16,10 @@
             <a href="{% url 'edit car' c.pk %}">Редактирай</a>
             <form method="post" action="{% url 'delete car' c.pk %}">
                 {% csrf_token %}
-                <button type="submit">Изтрий</button>
+                <button type="submit" class="btn danger"
+                        onclick="return confirm('Сигурен ли си, че искаш да изтриеш тази кола?')">
+                    Изтрий
+                </button>
             </form>
         {% endif %}
     {% endfor %}
