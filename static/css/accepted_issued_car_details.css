@@ -1,0 +1,61 @@
+.detail-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.detail-head .titles .eyebrow {
+  font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--c-muted); font-weight: 700; margin-bottom: 3px;
+}
+.detail-head h1 { margin: 0; font-size: 24px; letter-spacing: -.3px; display: flex; align-items: center; gap: 12px; }
+.detail-head h1 .num { font-family: var(--font-mono); color: var(--c-muted); font-size: 18px; }
+
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* статус-етикет (в сервиз / издаден) */
+.status { display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px; }
+.status.open { background: var(--c-warning-soft); color: var(--c-warning); }
+.status.done { background: var(--c-success-soft); color: var(--c-success); }
+
+/* мрежа от информационни карти */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+@media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
+
+.info-card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius); padding: 16px 18px; }
+.info-card h2 {
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--c-muted); font-weight: 700; margin: 0 0 12px;
+}
+.info-card dl { display: grid; grid-template-columns: auto 1fr; gap: 7px 18px; margin: 0; }
+.info-card dt { color: var(--c-muted); font-size: 13px; }
+.info-card dd { margin: 0; font-weight: 600; text-align: right; }
+.info-card dd.mono { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+
+/* секция с поправки/оплаквания */
+.sec {
+  font-size: 12px; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--c-muted); font-weight: 700;
+  margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--c-line-soft);
+}
+
+.issue-table { width: 100%; border-collapse: collapse; background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius); overflow: hidden; }
+.issue-table th {
+  background: #f4f6f8; text-align: left; font-size: 11px; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--c-muted); font-weight: 700;
+  padding: 10px 14px; border-bottom: 1px solid var(--c-line);
+}
+.issue-table td { padding: 12px 14px; border-bottom: 1px solid var(--c-line-soft); vertical-align: top; }
+.issue-table tr:last-child td { border-bottom: 0; }
+.issue-table td.idx { width: 36px; text-align: center; color: var(--c-muted); font-family: var(--font-mono); }
+.issue-table td.cat { width: 200px; font-weight: 600; }
+
+.empty-note { color: var(--c-muted); padding: 16px; background: var(--c-surface); border: 1px dashed var(--c-line); border-radius: var(--radius); text-align: center; }
+
+.notes-block { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--radius); padding: 14px 18px; margin-top: 14px; }
+.notes-block h2 { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--c-muted); font-weight: 700; margin: 0 0 6px; }
+.notes-block p { margin: 0; }
+
+/* долна лента с действия */
+.detail-foot { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+
+/* малка форма за изтриване, за да е бутонът в реда с другите */
+.inline-form { margin: 0; display: inline; }

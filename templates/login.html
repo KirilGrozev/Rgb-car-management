@@ -6,10 +6,22 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-    <form method="post" action="{% url 'login' %}">
+    <div class="form-head"><h1>Вход</h1></div>
+    <form method="post" action="{% url 'login' %}" class="form-card">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+                {% if field.help_text %}<span class="hint">{{ field.help_text }}</span>{% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn primary auth-submit">Вход</button>
 
-        <button type="submit">Вход</button>
+        <div class="auth-alt">
+            Нямаш акаунт? <a href="{% url 'register' %}">Регистрирай се</a>
+        </div>
     </form>
 {% endblock %}

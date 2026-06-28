@@ -61,10 +61,18 @@ class AcceptedCars(LoginRequiredMixin, SearchMixin, ListView):
     template_name = 'accеpted_cars.html'
     context_object_name = 'accepted_cars'
     paginate_by = 25
+    ordering = '-date'
 
     search_fields = [
         'car__registration_number'
     ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['recent_for_issuing'] = AcceptedCar.objects.filter(issuedcar__isnull=True).order_by('date')[:15]
+
+        return context
+
 
 
 class IssuedCars(LoginRequiredMixin, SearchMixin, ListView):
@@ -72,6 +80,7 @@ class IssuedCars(LoginRequiredMixin, SearchMixin, ListView):
     template_name = 'issued_cars.html'
     context_object_name = 'issued_cars'
     paginate_by = 25
+    ordering = '-date'
 
     search_fields = [
         'accepted_car__car__registration_number'

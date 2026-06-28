@@ -1,21 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'css/accepted_cars.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list_base.css' %}">
 {% endblock %}
 {% block title %}Приети коли{% endblock %}
 
 {% block content %}
-    {% include 'components/search_bar.html' with search_query=search_query %}
-    <a href="{% url 'create accepted car' %}">Създай приета кола</a>
+  <div class="list-head">
+    <div>
+      <div class="eyebrow">Документи</div>
+      <h1>Приеми</h1>
+      <div class="count">{{ page_obj.paginator.count }} записа</div>
+    </div>
+    <a href="{% url 'create accepted car' %}" class="btn primary">Нов прием</a>
+  </div>
 
-    {% for ac in accepted_cars %}
-        {{ ac.accepting_employee.first_name }} {{ ac.accepting_employee.last_name }}
-        {{ ac.car.registration_number }}
-        {{ ac.customer.first_name }} {{ ac.customer.last_name }}
-        {% for i in ac.issues.objects.all %}
-            {{ i.category }} - {{ i }}
+  <div class="list-toolbar">
+    {% include 'components/search_bar.html' with search_query=search_query %}
+    <button type="button" id="toggle-pending" class="btn">Покажи най-чакащите</button>
+  </div>
+
+  {# ---- всички приеми (странирани) ---- #}
+  <div id="all-list">
+    {% if object_list %}
+      <div class="card-grid">
+        {% for ac in object_list %}
+          <div class="list-card">
+            <div class="lc-top">
+              <div>
+                <div class="lc-title mono">ПР-{{ ac.pk|stringformat:"04d" }}</div>
+                <div class="lc-sub">{{ ac.car.brand }} - {{ ac.car.model }} · {{ ac.car.registration_number }}</div>
+              </div>
+              {% if ac.issuedcar %}<span class="status done">Издаден</span>{% else %}<span class="status open">В сервиз</span>{% endif %}
+            </div>
+            <div class="lc-meta">
+              <div class="row"><span class="k">Клиент</span><span class="v">{{ ac.customer }}</span></div>
+              <div class="row"><span class="k">Дата</span><span class="v">{{ ac.date|date:"d.m.Y" }}</span></div>
+            </div>
+            <div class="lc-foot">
+              <a href="{% url 'accepted car details' ac.pk %}" class="btn sm">Детайли</a>
+            </div>
+          </div>
         {% endfor %}
-        <a href="{% url 'accepted car details' ac.pk %}">Детайли</a>
-    {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+        <nav class="pager">
+          {% if page_obj.has_previous %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+          <span class="pager-info">Стр. {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}">Напред</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state"><p>Няма приеми</p><span>Създай първия с „Нов прием".</span></div>
+    {% endif %}
+  </div>
+
+  {# ---- 15-те най-чакащи (неиздадени, най-отдавна приети) ---- #}
+  <div id="pending-list" hidden>
+    <p class="toolbar-note">15-те най-отдавна приети и още неиздадени автомобила</p>
+    {% if recent_for_issuing %}
+      <div class="card-grid">
+        {% for ac in recent_for_issuing %}
+          <div class="list-card">
+            <div class="lc-top">
+              <div>
+                <div class="lc-title mono">ПР-{{ ac.pk|stringformat:"04d" }}</div>
+                <div class="lc-sub">{{ ac.car.brand }} - {{ ac.car.model }} · {{ ac.car.registration_number }}</div>
+              </div>
+              <span class="status open">В сервиз</span>
+            </div>
+            <div class="lc-meta">
+              <div class="row"><span class="k">Клиент</span><span class="v">{{ ac.customer }}</span></div>
+              <div class="row"><span class="k">Приет на</span><span class="v">{{ ac.date|date:"d.m.Y" }}</span></div>
+            </div>
+            <div class="lc-foot">
+              <a href="{% url 'accepted car details' ac.pk %}" class="btn sm">Детайли</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><p>Няма чакащи автомобили</p><span>Всичко прието е издадено.</span></div>
+    {% endif %}
+  </div>
+
+  <script src="{% static 'js/switch_accepted_cars.js' %}"></script>
 {% endblock %}

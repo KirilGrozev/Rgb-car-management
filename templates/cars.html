@@ -1,26 +1,50 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'css/cars.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list_base.css' %}">
 {% endblock %}
 {% block title %}Всички коли{% endblock %}
 
 {% block content %}
-    {% include 'components/search_bar.html' with search_query=search_query %}
-    <a href="{% url 'create car' %}">Създай кола</a>
+  <div class="list-head">
+    <div>
+      <div class="eyebrow">Парк</div>
+      <h1>Коли</h1>
+      <div class="count">{{ page_obj.paginator.count }} записа</div>
+    </div>
+    <a href="{% url 'create car' %}" class="btn primary">Създай кола</a>
+  </div>
 
-    {% for c in cars %}
-        {{ c.registration_number }}
-        {{ c.brand }} -> {{ c.model }}
-        {% if request.user.is_superuser %}
-            <a href="{% url 'edit car' c.pk %}">Редактирай</a>
-            <form method="post" action="{% url 'delete car' c.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn danger"
-                        onclick="return confirm('Сигурен ли си, че искаш да изтриеш тази кола?')">
-                    Изтрий
-                </button>
-            </form>
-        {% endif %}
-    {% endfor %}
+  <div class="list-toolbar">
+    {% include 'components/search_bar.html' with search_query=search_query %}
+  </div>
+
+  {% if object_list %}
+    <div class="card-grid">
+      {% for car in object_list %}
+        <div class="list-card">
+          <div class="lc-top">
+            <div>
+              <div class="lc-title">{{ car.brand }}</div>
+              <div class="lc-sub mono">{{ car.model }}</div>
+              <div class="lc-sub mono">{{ car.registration_number }}</div>
+            </div>
+          </div>
+          <div class="lc-meta">
+            <div class="row"><span class="k">VIN</span><span class="v mono">{{ car.vin_number|default:"—" }}</span></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <nav class="pager">
+        {% if page_obj.has_previous %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+        <span class="pager-info">Стр. {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}">Напред</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state"><p>Няма автомобили</p><span>Добави първия с „Нов автомобил".</span></div>
+  {% endif %}
 {% endblock %}

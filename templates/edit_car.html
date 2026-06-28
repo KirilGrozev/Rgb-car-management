@@ -6,10 +6,23 @@
 {% block title %}Редактиране на кола{% endblock %}
 
 {% block content %}
-    <form method="post" action="{% url 'edit car' object.pk %}">
+    <div class="form-head"><h1>Редактирай кола</h1></div>
+    <form method="post" action="{% url 'edit car' object.pk %}" class="form-card">
         {% csrf_token %}
-        {{ form.as_p }}
-
-        <button type="submit">Редактирай</button>
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+                {% if field.help_text %}<span class="hint">{{ field.help_text }}</span>{% endif %}
+            </div>
+        {% endfor %}
+        <div class="form-foot">
+            <div class="right">
+                <a href="{% url 'cars' %}" class="btn">Отказ</a>
+                <button type="submit" class="btn primary">Редактирай</button>
+            </div>
+        </div>
     </form>
 {% endblock %}

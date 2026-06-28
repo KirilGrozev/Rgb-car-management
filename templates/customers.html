@@ -1,24 +1,42 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'css/customers.css' %}">
+    <link rel="stylesheet" href="{% static 'css/list_base.css' %}">
 {% endblock %}
 {% block title %}Клиенти{% endblock %}
 
 {% block content %}
-    <a href="{% url 'create customer' %}">Създай клиент</a>
+  <div class="list-head">
+    <div>
+      <div class="eyebrow">Контакти</div>
+      <h1>Клиенти</h1>
+      <div class="count">{{ page_obj.paginator.count }} записа</div>
+    </div>
+    <a href="{% url 'create customer' %}" class="btn primary">Създай клиент</a>
+  </div>
 
-    {% for c in customers %}
-        {{ c.first_name }} {{ c.last_name }} -> {{ c.phone_number }}
-        {% if request.user.is_superuser %}
-            <a href="{% url 'edit customer' c.pk %}">Редактирай</a>
-            <form method="post" action="{% url 'delete customer' c.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn danger"
-                        onclick="return confirm('Сигурен ли си, че искаш да изтриеш този клиент?')">
-                    Изтрий
-                </button>
-            </form>
-        {% endif %}
-    {% endfor %}
+  {% if object_list %}
+    <div class="card-grid">
+      {% for customer in object_list %}
+        <div class="list-card">
+          <div class="lc-top">
+            <div class="lc-title">{{ customer }}</div>
+          </div>
+          <div class="lc-meta">
+            <div class="row"><span class="k">Телефон</span><span class="v mono">{{ customer.phone_number|default:"—" }}</span></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <nav class="pager">
+        {% if page_obj.has_previous %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+        <span class="pager-info">Стр. {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn sm" href="?{% if search_query %}{{ search_param|default:'q' }}={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}">Напред</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state"><p>Няма клиенти</p><span>Добави първия с „Нов клиент".</span></div>
+  {% endif %}
 {% endblock %}

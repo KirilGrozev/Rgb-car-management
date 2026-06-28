@@ -14,7 +14,7 @@ class SearchMixin:
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
+        search_query = self.request.GET.get('q', '')
 
         if search_query and self.search_fields:
             q_objects = Q()
@@ -26,7 +26,7 @@ class SearchMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context['search_query'] = self.request.GET.get('q', '')
         context['clear_url'] = self.request.path
         return context
 

@@ -1,19 +1,71 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block additional_css %}
-    <link rel="stylesheet" href="{% static 'css/issued_car_details.css' %}">
+    <link rel="stylesheet" href="{% static 'css/accepted_issued_car_details.css' %}">
 {% endblock %}
 {% block title %}Детайли за издадената кола{% endblock %}
 
 {% block content %}
-    {% if request.user.is_superuser %}
-        <a href="{% url 'edit issued car' object.pk %}">Редактирай</a>
-        <form method="post" action="{% url 'delete issued car' object.pk %}">
+  <div class="detail-head">
+    <div class="titles">
+      <div class="eyebrow">Документ за издаване</div>
+      <h1>Издаване <span class="num">ИЗ-{{ object.pk|stringformat:"04d" }}</span></h1>
+    </div>
+    <div class="detail-actions">
+      <a href="{% url 'issued car pdf' object.pk %}" target="_blank" class="btn">PDF</a>
+      {% if request.user.is_superuser %}
+        <a href="{% url 'edit issued car' object.pk %}" class="btn">Редактирай</a>
+        <form method="post" action="{% url 'delete issued car' object.pk %}" class="inline-form"
+                onsubmit="return confirm('Да изтрия ли това издаване?')">
             {% csrf_token %}
-            <button type="submit" class="btn danger"
-                    onclick="return confirm('Сигурен ли си, че искаш да изтриеш това издаване?')">
-                Изтрий
-            </button>
+            <button type="submit" class="btn danger">Изтрий</button>
         </form>
-    {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="info-card">
+      <h2>Кола</h2>
+      <dl>
+        <dt>Марка</dt><dd>{{ object.accepted_car.car.brand }}</dd>
+        <dt>Модел</dt><dd>{{ object.accepted_car.car.model }}</dd>
+        <dt>Рег. номер</dt><dd class="mono">{{ object.accepted_car.car.registration_number }}</dd>
+        <dt>VIN</dt><dd class="mono">{{ object.accepted_car.car.vin_number|default:"—" }}</dd>
+        <dt>По прием</dt><dd class="mono">ПР-{{ object.accepted_car.pk|stringformat:"04d" }}</dd>
+      </dl>
+    </div>
+    <div class="info-card">
+      <h2>Клиент и издаване</h2>
+      <dl>
+        <dt>Клиент</dt><dd>{{ object.accepted_car.customer }}</dd>
+        <dt>Телефон</dt><dd class="mono">{{ object.accepted_car.customer.phone_number|default:"—" }}</dd>
+        <dt>Ремонта извърши</dt><dd>{{ object.mechanic|default:"—" }}</dd>
+        <dt>Дата</dt><dd>{{ object.date|date:"d.m.Y" }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="sec">Извършени поправки</div>
+  {% if object.repairs.all %}
+    <table class="issue-table">
+      <thead><tr><th class="idx">№</th><th class="cat">Категория</th><th>Поправка</th></tr></thead>
+      <tbody>
+        {% for repair in object.repairs.all %}
+          <tr>
+            <td class="idx">{{ forloop.counter }}</td>
+            <td class="cat">{{ repair.category.category }}</td>
+            <td>{% if repair.problem %}{{ repair.problem.name }}{% else %}{{ repair.other_issue }}{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-note">Няма записани поправки.</div>
+  {% endif %}
+
+  <div class="detail-foot">
+    <a href="{% url 'accepted car details' object.accepted_car.pk %}" class="btn">Виж приема</a>
+    <a href="{% url 'issued cars' %}" class="btn">Към списъка</a>
+  </div>
 {% endblock %}

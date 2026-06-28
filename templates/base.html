@@ -1,27 +1,66 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Auto RGB Clima{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block additional_css %}{% endblock %}
     {% block extra_head %}{% endblock %}
-    <title>{% block title %}RGB Car Management{% endblock %}</title>
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="{% url 'accepted cars' %}">Приети коли</a></li>
-            <li><a href="{% url 'cars' %}">Коли</a></li>
-            <li><a href="{% url 'issued cars' %}">Издадени коли</a></li>
-            <li><a href="{% url 'customers' %}">Клиенти</a></li>
-            <li><a href="{% url 'logout' %}">Изход</a></li>
-        </ul>
-    </nav>
+<a class="skip-link" href="#content">Към съдържанието</a>
 
-    {% block content %}
-    {% endblock %}
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="{% url 'accepted cars' %}" class="brand">
+            <span class="brand-mark">AC</span>
+            <span class="brand-text">Auto <b>RGB</b> Clima<small>Управление на сервиза</small></span>
+        </a>
+
+        <nav class="nav" aria-label="Основна навигация">
+            сменете префиксите в проверките според вашите URL пътища
+            <a href="{% url 'accepted cars' %}" class="nav-link {% if '/priem' in request.path %}active{% endif %}">Приеми</a>
+            <a href="{% url 'issued cars' %}" class="nav-link {% if '/izdavane' in request.path %}active{% endif %}">Издавания</a>
+            <a href="{% url 'cars' %}" class="nav-link {% if '/avtomobili' in request.path %}active{% endif %}">Коли</a>
+            <a href="{% url 'customers' %}" class="nav-link {% if '/klienti' in request.path %}active{% endif %}">Клиенти</a>
+        </nav>
+
+        {% if request.user.is_authenticated %}
+            <div class="user-area">
+                <span class="user-name">{{ request.user|default:user.email }}</span>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Изход</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</header>
+
+{% if messages %}
+    <div class="messages" role="status">
+        {% for message in messages %}
+            <div class="msg msg-{{ message.tags }}">
+                <span>{{ message }}</span>
+                <button type="button" class="msg-close" aria-label="Затвори" onclick="this.parentNode.remove()">
+                    &times;
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<main id="content" class="content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <span class="footer-brand">Auto <b>RGB</b> Clima</span>
+        <span class="footer-meta">Система за управление на приеми и издавания · {% now "Y" %}</span>
+    </div>
+</footer>
 </body>
 </html>

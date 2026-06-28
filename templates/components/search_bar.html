@@ -1,15 +1,12 @@
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="form-inline">
-            <input
+<div class="list-toolbar">
+    <form method="get" class="search-form">
+        <input
                 type="text"
-                name="search"
-                class="form-control mr-2"
+                name="{{ search_param|default:'q' }}"
                 placeholder="Търси..."
                 value="{{ search_query }}"
-            >
-            <button type="submit" class="btn btn-primary mr-2">Търси</button>
-            <a href="{{ clear_url }}" class="btn btn-secondary">Изчисти</a>
-        </form>
-    </div>
+        >
+        <button type="submit" class="btn">Търси</button>
+        <a href="{{ clear_url }}" class="btn">Изчисти</a>
+    </form>
 </div>

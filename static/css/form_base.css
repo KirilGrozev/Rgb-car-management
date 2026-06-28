@@ -1,5 +1,94 @@
-.hide { display: none}
-
-.select2-container {
-    width: 100% !important;
+/* ---------- Заглавна част на формата ---------- */
+.form-head { margin-bottom: 22px; }
+.form-head .eyebrow {
+  font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--c-muted); font-weight: 700; margin-bottom: 3px;
 }
+.form-head h1 { margin: 0; font-size: 24px; letter-spacing: -.3px; }
+
+/* ---------- Картата на формата ---------- */
+.form-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+
+/* ---------- Мрежи от полета ---------- */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+/* ---------- Разделител на секции ---------- */
+.sec {
+  font-size: 12px; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--c-muted); font-weight: 700;
+  margin: 24px 0 12px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--c-line-soft);
+}
+
+/* ---------- Заключен блок (напр. приетата кола при издаване) ---------- */
+.readonly-block {
+  background: #f4f6f8;
+  border: 1px solid var(--c-line-soft);
+  border-radius: 8px;
+  padding: 11px 14px; margin-bottom: 14px;
+}
+.readonly-block .line { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 13px; }
+.readonly-block .line .k { color: var(--c-muted); }
+
+/* ---------- Подсказки и грешки ---------- */
+.hint { font-size: 12px; color: var(--c-muted); }
+.errorlist {
+  list-style: none; margin: 4px 0 0; padding: 0;
+  color: var(--c-danger); font-size: 12.5px;
+}
+.errorlist.nonfield {
+  background: var(--c-danger-soft); border: 1px solid #f3c9c4;
+  border-radius: 8px; padding: 10px 14px; margin: 0 0 16px;
+  font-weight: 600;
+}
+
+/* ---------- Редове на формсета (оплаквания / поправки) ---------- */
+.complaint-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.complaint-row .cat { flex: 0 0 200px; }
+.complaint-row .mid { flex: 1; min-width: 0; }
+.complaint-row .mid select,
+.complaint-row .mid textarea { width: 100%; }
+@media (max-width: 600px) {
+  .complaint-row { flex-wrap: wrap; }
+  .complaint-row .cat { flex: 1 1 100%; }
+}
+
+.problem-wrap, .custom-wrap { display: block; }
+.hide { display: none; }
+
+/* чекбоксът DELETE се крие, видим е бутонът "Махни" */
+.del-box { display: none; }
+.remove-row {
+  flex: 0 0 auto; height: 40px;
+  background: transparent; border: 1px solid var(--c-line);
+  color: var(--c-ink-2); font: inherit; font-size: 13px; font-weight: 600;
+  padding: 0 12px; border-radius: 8px; cursor: pointer;
+}
+.remove-row:hover { background: var(--c-danger-soft); border-color: #f3c9c4; color: var(--c-danger); }
+
+/* бутонът "Добави ред" */
+.add-row { margin-top: 4px; }
+
+/* ---------- Долна лента с действия ---------- */
+.form-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--c-line-soft);
+  flex-wrap: wrap;
+}
+.form-foot .left { display: flex; align-items: center; gap: 12px; }
+.form-foot .right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+.auth-submit { width: 100%; justify-content: center; margin-top: 6px;}
+.auth-alt {
+  margin-top: 18px; padding-top: 16px;
+  border-top: 1px solid var(--c-line-soft);
+  text-align: center; font-size: 14px; color: var(--c-muted);
+}
+.auth-alt a { font-weight: 600; }
